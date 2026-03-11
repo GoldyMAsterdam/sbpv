@@ -5,13 +5,17 @@
 =======
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+<<<<<<< HEAD
 >>>>>>> Stashed changes
+=======
+>>>>>>> Goldy
 
 :root {
   --darkgray: #A9A9A9;
   --purple1: #7B2FBE;
 }
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -24,5 +28,8 @@ body {
 =======
 body {
 >>>>>>> Stashed changes
+=======
+body {
+>>>>>>> Goldy
   font-family: 'Poppins', sans-serif;
 }
