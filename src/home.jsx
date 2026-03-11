@@ -1,21 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import bgImage from "./assets/dark-skyblock-background.png";
+import { getUsernameData } from "./fetch/getuuid";
 
 export default function Home() {
   const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username.trim()) {
-      navigate(`/pv?username=${encodeURIComponent(username.trim())}`);
+    setError("");
+    setLoading(true);
+    const result = await getUsernameData(username.trim());
+    setLoading(false);
+    if (!result.valid) {
+      setError("No profile found for that username.");
+      return;
     }
+    navigate(`/pv?username=${result.username}&uuid=${result.uuid}`);
   };
 
   return (
     <div
       className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center"
-      style={{ backgroundImage: "url(assets/dark-skyblock-background.png)" }}
+      style={{ backgroundImage: `url(${bgImage})` }}
     >
       <div
         className="
@@ -28,13 +38,12 @@ export default function Home() {
         <h1 className="text-3xl font-bold text-center tracking-tight">
           View Skyblock stats for:
         </h1>
-
         <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
           <input
             type="text"
             id="InputUsername"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => { setUsername(e.target.value); setError(""); }}
             placeholder="Enter Minecraft username"
             className="
               w-[60%] min-w-[200px] min-h-[100px]
@@ -45,17 +54,19 @@ export default function Home() {
               hover:border-white focus:border-white
             "
           />
-
+          {error && (
+            <p className="text-red-400 text-sm font-medium">{error}</p>
+          )}
           <button
             type="submit"
-            disabled={!username.trim()}
+            disabled={!username.trim() || loading}
             className="
               mt-2 px-8 py-2 rounded-xl font-semibold text-lg
               bg-[#7B2FBE] hover:bg-[#9b3fde] disabled:opacity-40
               transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed
             "
           >
-            View Stats
+            {loading ? "Checking..." : "View Stats"}
           </button>
         </form>
       </div>
