@@ -1,10 +1,25 @@
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './Navbar';
+import Pv from './pv';
 
 export default function App() {
-
   return (
-    <div className="">
-        <h1>Faggots</h1>
+    <Router>
+      <Navbar />
+      <div className="content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/pv" element={<Pv />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+function Home() {
+  return (
+    <div>
+        <h1>HI</h1>
     </div>
-  )
+  );
 }
