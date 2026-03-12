@@ -16,7 +16,7 @@ export default function Home() {
     const result = await getUsernameData(username.trim());
     setLoading(false);
     if (!result.valid) {
-      setError("No profile found for that username.");
+      setError("No profile found for that username. (Placeholder)");
       return;
     }
     navigate(`/pv?username=${result.username}&uuid=${result.uuid}`);
@@ -27,14 +27,17 @@ export default function Home() {
       className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center"
       style={{ backgroundImage: `url(${bgImage})` }}
     >
-      <div
+        <div
         className="
-          relative flex flex-col items-center justify-center gap-6
-          min-h-[400px] w-[70%] min-w-[300px] px-8 py-12
-          rounded-2xl border border-black/30 text-white
-          bg-black/50 backdrop-blur-md shadow-xl
+            relative flex flex-col items-center justify-center gap-6
+            min-h-100 w-[70%] min-w-75 px-8 py-12
+            rounded-2xl text-white
+            bg-black/55
+            backdrop-blur-xl backdrop-saturate-150
+            border border-white/10
+            shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.07)]
         "
-      >
+        >
         <h1 className="text-3xl font-bold text-center tracking-tight">
           View Skyblock stats for:
         </h1>
