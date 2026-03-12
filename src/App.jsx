@@ -6,6 +6,7 @@ import Home from './Home';
 export default function App() {
   return (
     <Router>
+      <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/pv" element={<Pv />} />
