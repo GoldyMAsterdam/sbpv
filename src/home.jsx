@@ -30,7 +30,7 @@ export default function Home() {
         <div
         className="
             relative flex flex-col items-center justify-center gap-6
-            min-h-100 w-[70%] min-w-75 px-8 py-12
+            min-h-100 w-[50%] min-w-75 px-8 py-12
             rounded-2xl text-white
             bg-black/55
             backdrop-blur-xl backdrop-saturate-150
@@ -41,15 +41,15 @@ export default function Home() {
         <h1 className="text-3xl font-bold text-center tracking-tight">
           View Skyblock stats for:
         </h1>
-        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
+        <form onSubmit={handleSubmit} spellcheck="false" className="w-full flex flex-col items-center gap-4">
           <input
             type="text"
             id="InputUsername"
             value={username}
             onChange={(e) => { setUsername(e.target.value); setError(""); }}
-            placeholder="Enter Minecraft username"
+            placeholder="Enter username"
             className="
-              w-[60%] min-w-[200px] min-h-[100px]
+              w-[60%] min-w-50 min-h-25
               bg-transparent border-2 border-[#A9A9A9] rounded-xl
               text-white text-2xl font-bold text-center
               outline-none resize-none transition-colors duration-150
