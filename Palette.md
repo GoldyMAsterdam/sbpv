@@ -7,7 +7,7 @@
 Primary Text - #F2F2F2
 Muted/sec - #A1A1AA
 
-## Accent / Magenta
+## Accent / Violet
 
 Primary - #7B2FBE
 Hover - #9B3FDE
