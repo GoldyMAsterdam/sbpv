@@ -2,15 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import * as skinview3d from "skinview3d";
 import bgImage from "./assets/dark-skyblock-background.png";
 import { getUsernameData } from "./fetch/getuuid";
-import PlayerCard from "./PlayerCard"; // Ensure this matches your filename
+import PlayerCard from "./components/Playercard";
 
 const classes = {
-  card: "bg-black/50 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl",
-  input: "flex-1 flex items-center gap-3 bg-white/10 border border-white/20 rounded-xl px-5 py-3",
-  searchButton: "px-8 py-3 rounded-xl font-semibold text-lg text-white bg-[#7B2FBE] hover:bg-[#9b3fde] disabled:opacity-40 transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap",
-  recentChip: "flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/30 text-white text-sm hover:bg-white/20 hover:border-white/50 transition-colors duration-150",
-  recentLabel: "text-white/50 text-sm flex items-center gap-1 shrink-0",
-  icon: "w-5 h-5 text-white/40 shrink-0",
+  card: "bg-black/60 backdrop-blur-md border border-[#84D7C4]/20 rounded-2xl shadow-xl", // Subtle mint border
+  input: "flex-1 flex items-center gap-3 bg-black/40 border border-[#84D7C4]/30 rounded-xl px-5 py-3 focus-within:border-[#84D7C4]/60 transition-all",
+  searchButton: "px-8 py-3 rounded-xl font-semibold text-lg text-black bg-[#84D7C4] hover:bg-[#A5E8D9] disabled:opacity-40 transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap", // Mint button
+  recentChip: "flex items-center gap-2 px-3 py-1 rounded-full bg-black/40 border border-[#84D7C4]/20 text-white/80 text-sm hover:bg-[#84D7C4]/10 hover:border-[#84D7C4]/50 transition-colors duration-150",
+  recentLabel: "text-[#84D7C4]/50 text-sm flex items-center gap-1 shrink-0",
+  icon: "w-5 h-5 text-[#84D7C4]/40 shrink-0",
 };
 
 export default function Home() {
@@ -49,7 +49,7 @@ export default function Home() {
       className="min-h-screen bg-cover bg-center bg-no-repeat fixed inset-0 overflow-y-auto"
       style={{ backgroundImage: `url(${bgImage})` }}
     >
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm -z-0" />
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm -z-0" /> {/* Darker overlay for better contrast */}
 
       <div className="relative z-10 flex flex-col items-center pt-24 pb-32 gap-4">
         <div className="w-[70%] min-w-[300px] flex flex-col gap-4">
@@ -67,7 +67,7 @@ export default function Home() {
                   value={username}
                   onChange={(e) => { setUsername(e.target.value); setError(""); }}
                   placeholder="Enter Minecraft IGN..."
-                  className="flex-1 bg-transparent text-white text-lg outline-none placeholder:text-white/30"
+                  className="flex-1 bg-transparent text-white text-lg outline-none placeholder:text-[#84D7C4]/20"
                 />
               </div>
               <button
@@ -100,7 +100,7 @@ export default function Home() {
                       <img
                         src={`https://mc-heads.net/avatar/${name}/16`}
                         alt={name}
-                        className="w-5 h-5 rounded-sm"
+                        className="w-5 h-5 rounded-sm grayscale hover:grayscale-0 transition-all"
                       />
                       {name}
                     </button>
@@ -110,7 +110,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* Player Result Card - This now renders your PlayerCard.jsx component */}
           <PlayerCard player={player} />
 
         </div>

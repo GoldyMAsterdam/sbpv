@@ -16,6 +16,7 @@
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.1",
     "skinview3d": "^3.4.1",
+    "skyhelper-networth": "^2.7.2",
     "tailwindcss": "^4.2.1"
   },
   "devDependencies": {
