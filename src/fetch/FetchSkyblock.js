@@ -44,6 +44,8 @@ const SKILL_KEYS = {
   runecrafting: { key: "SKILL_RUNECRAFTING", maxLevel: 25 },
 };
 
+const CLASS_KEYS = ["healer", "mage", "berserk", "archer", "tank"];
+
 async function hypixelFetch(path, params = {}) {
   const url = new URL(`https://api.hypixel.net/v2${path}`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
@@ -59,7 +61,8 @@ export async function fetchSkyblockData(uuid) {
   const data = await hypixelFetch("/skyblock/profiles", { uuid });
   if (!data.success || !data.profiles?.length) return null;
 
-  const profile = data.profiles.find(p => p.selected) ??
+  const profile =
+    data.profiles.find((p) => p.selected) ??
     data.profiles.reduce((a, b) =>
       (b.members?.[uuid]?.last_save ?? 0) > (a.members?.[uuid]?.last_save ?? 0) ? b : a
     );
@@ -67,19 +70,60 @@ export async function fetchSkyblockData(uuid) {
   const member = profile.members?.[uuid];
   if (!member) return null;
 
+  // ── Skills ───────────────────────────────────────────────────────────────────
   const experience = member.player_data?.experience ?? {};
-
   const skills = Object.entries(SKILL_KEYS).map(([name, { key, maxLevel }]) => {
     const xp = experience[key] ?? 0;
     return { name, xp, ...xpToLevel(xp, SKILL_XP_TABLE, maxLevel) };
   });
 
-  const cataXP = member.dungeons?.dungeon_types?.catacombs?.experience ?? 0;
-  const catacombs = { xp: cataXP, ...xpToLevel(cataXP, CATA_XP_TABLE, 50) };
+  // ── Catacombs ────────────────────────────────────────────────────────────────
+  const dungeons      = member.dungeons ?? {};
+  const cataData      = dungeons.dungeon_types?.catacombs ?? {};
+  const masterData    = dungeons.dungeon_types?.master_catacombs ?? {};
+  const playerClasses = dungeons.player_classes ?? {};
 
+  const cataXP    = cataData.experience ?? 0;
+  const cataLevel = xpToLevel(cataXP, CATA_XP_TABLE, 50);
+
+  // Per-class levels — XP lives at dungeons.player_classes.{class}.experience
+  const classLevels = {};
+  for (const cls of CLASS_KEYS) {
+    const clsXP = playerClasses[cls]?.experience ?? 0;
+    const { level } = xpToLevel(clsXP, CATA_XP_TABLE, 50);
+    classLevels[`${cls}_level`] = level;
+    classLevels[`${cls}_exp`]   = clsXP;
+  }
+
+  const catacombs = {
+    // Level / XP / progress
+    experience: cataXP,
+    level:      cataLevel.level,
+    progress:   cataLevel.progress,
+    current:    cataLevel.current,
+    needed:     cataLevel.needed,
+    maxLevel:   50,
+
+    // Class levels
+    ...classLevels,
+
+    // Active class
+    selected_class: dungeons.selected_dungeon_class ?? null,
+
+    // Secrets — top-level counter on the dungeons object
+    secrets_found: dungeons.secrets ?? 0,
+
+    // Floor completions — tier_completions (NOT times_played)
+    // Keys: "0" = entrance, "1"–"7" = floors
+    times_completed:             cataData.tier_completions  ?? {},
+    master_mode_times_completed: masterData.tier_completions ?? {},
+  };
+
+  // ── Slayers ──────────────────────────────────────────────────────────────────
   const slayerData = member.slayer?.slayer_bosses ?? {};
   const slayers = Object.entries(slayerData).map(([name, d]) => ({
-    name, xp: d.xp ?? 0,
+    name,
+    xp: d.xp ?? 0,
   }));
 
   return { profileName: profile.cute_name, skills, catacombs, slayers };

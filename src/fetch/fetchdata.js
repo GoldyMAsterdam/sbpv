@@ -1,73 +1,60 @@
-import "dotenv/config";
+// --- SKYCRYPT CATACOMBS XP TABLE ---
+const CATA_XP_TABLE = [
+    0, 50, 125, 235, 395, 625, 955, 1425, 2095, 3045, 4385, 6275, 8940, 12700, 17960, 25340, 35640, 50040, 70040, 97640,
+    135640, 188140, 259640, 356640, 488640, 668640, 911640, 1239640, 1684640, 2284640, 3084640, 4149640, 5559640, 7459640,
+    9959640, 13259640, 17559640, 23159640, 30359640, 39559640, 51559640, 66559640, 85559640, 109559640, 139559640,
+    177559640, 225559640, 285559640, 360559640, 453055964, 569805596
+];
 
-const API_KEY = process.env.HYPIXEL_API_KEY;
-const BASE_URL = "https://api.hypixel.net";
+/**
+ * Calculates Level, Progress, and XP remaining based on cumulative XP
+ */
+function getLevelInfo(cumulativeXp) {
+    const xp = cumulativeXp || 0;
+    let level = 0;
 
-if (!API_KEY) {
-  throw new Error("Missing HYPIXEL_API_KEY in your .env file.");
+    for (let i = 0; i < CATA_XP_TABLE.length; i++) {
+        if (xp >= CATA_XP_TABLE[i]) level = i;
+        else break;
+    }
+
+    if (level >= 50) return { level: 50, progress: 1, xpToNext: 0, currentXp: xp };
+
+    const currentLevelThreshold = CATA_XP_TABLE[level];
+    const nextLevelThreshold = CATA_XP_TABLE[level + 1];
+    const xpInLevel = xp - currentLevelThreshold;
+    const xpNeededForNext = nextLevelThreshold - currentLevelThreshold;
+
+    return {
+        level,
+        progress: xpInLevel / xpNeededForNext,
+        xpToNext: nextLevelThreshold - xp,
+        currentXp: xp
+    };
 }
 
-// --- Helper ---
-async function apiFetch(path, params = {}) {
-  const url = new URL(path, BASE_URL);
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(`API error ${res.status}: ${url}`);
-  return res.json();
+/**
+ * The Parser: Transforms Raw Hypixel API data into the SkyCrypt-style object
+ */
+export function parseDungeonData(profilesResponse, uuid) {
+    if (!profilesResponse?.profiles) return null;
+
+    const activeProfile = profilesResponse.profiles.find(p => p.selected) || profilesResponse.profiles[0];
+    const member = activeProfile?.members?.[uuid];
+    if (!member?.dungeons) return null;
+
+    const d = member.dungeons;
+    const classNames = ["healer", "mage", "berserk", "archer", "tank"];
+    const classes = {};
+
+    classNames.forEach(name => {
+        const xp = d.player_classes?.[name]?.experience || 0;
+        classes[name] = getLevelInfo(xp);
+    });
+
+    return {
+        catacombs: getLevelInfo(d.dungeon_types?.catacombs?.experience || 0),
+        selected_class: d.selected_dungeon_class || "None",
+        classes: classes
+    };
 }
-
-// --- Public resource endpoints (no key required) ---
-export const getSkyblockItems      = () => apiFetch("/resources/skyblock/items");
-export const getSkyblockCollections= () => apiFetch("/resources/skyblock/collections");
-export const getSkyblockSkills     = () => apiFetch("/resources/skyblock/skills");
-export const getSkyblockElection   = () => apiFetch("/resources/skyblock/election");
-export const getSkyblockBingo      = () => apiFetch("/resources/skyblock/bingo");
-
-// --- Authenticated endpoints ---
-export const getSkyblockBazaar     = () => apiFetch("/skyblock/bazaar", { key: API_KEY });
-export const getSkyblockNews       = () => apiFetch("/skyblock/news",   { key: API_KEY });
-export const getSkyblockAuctions   = (page = 0) =>
-  apiFetch("/skyblock/auctions", { key: API_KEY, page });
-export const getSkyblockProfiles   = (uuid) =>
-  apiFetch("/skyblock/profiles", { key: API_KEY, uuid });
-
-// --- Mojang: username → UUID ---
-export async function getPlayerUUID(username) {
-  const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-  if (!res.ok) throw new Error(`Mojang API error for "${username}"`);
-  const data = await res.json();
-  return data.id;
-}
-
-// --- Main ---
-async function main() {
-  console.log("=== Fetching Skyblock Data ===\n");
-
-  const [items, collections, skills, election, bingo, bazaar, auctions, news] =
-    await Promise.all([
-      getSkyblockItems(),
-      getSkyblockCollections(),
-      getSkyblockSkills(),
-      getSkyblockElection(),
-      getSkyblockBingo(),
-      getSkyblockBazaar(),
-      getSkyblockAuctions(0),
-      getSkyblockNews(),
-    ]);
-
-  console.log(`[1] Items:       ${items.items?.length ?? 0} items`);
-  console.log(`[2] Collections: ${Object.keys(collections.collections ?? {}).length} categories`);
-  console.log(`[3] Skills:      ${Object.keys(skills.skills ?? {}).length} skills`);
-  console.log(`[4] Mayor:       ${election.mayor?.name ?? "Unknown"}`);
-  console.log(`[5] Bingo goals: ${bingo.goals?.length ?? 0}`);
-  console.log(`[6] Bazaar:      ${Object.keys(bazaar.products ?? {}).length} products`);
-  console.log(`[7] Auctions:    ${auctions.totalAuctions ?? "N/A"} total (${auctions.totalPages ?? "N/A"} pages)`);
-  console.log(`[8] News:        ${news.items?.[0]?.title ?? "N/A"}`);
-
-  // Uncomment to fetch a specific player's profiles:
-  // const uuid = await getPlayerUUID("YourUsername");
-  // const profiles = await getSkyblockProfiles(uuid);
-  // console.log("Profiles:", profiles.profiles?.map(p => p.cute_name));
-}
-
-main().catch(console.error);
